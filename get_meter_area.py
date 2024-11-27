@@ -19,6 +19,7 @@ class Detector(object):
         self.init_model()
 
     def init_model(self):
+        # todo：这里改yolo模型
         # 使用yolov5模型
         self.weights = 'yolov5/best.pt'
         self.device = '0' if torch.cuda.is_available() else 'cpu'
@@ -65,7 +66,7 @@ class Detector(object):
                         [225, 255, 255], thickness=tf, lineType=cv2.LINE_AA)
         return image
 
-    def detect(self, im, i):
+    def detect(self, im):
 
         im0, img = self.preprocess(im)
 
@@ -112,12 +113,18 @@ if __name__ == "__main__":
     img_list = os.listdir(path)
     total_time = 0
     num = 0
-    for i in img_list:
-        img = cv2.imread(path + i)
-        start_time = time.time()
-        image, image_info, digital_list, meter_list = det.detect(img, i)
+    start_time = time.time()
+    for img_name in img_list:
+        img = cv2.imread(path + img_name)
+        image, image_info, digital_list, meter_list = det.detect(img)
         end_time = time.time()
-        total_time += end_time - start_time
+        total_time = end_time - start_time
         fps = (num + 1) / total_time
         num += 1
         print("fps", fps)
+        # cv2.imshow(img_name, image)
+        # for digital in digital_list:
+        #     cv2.imshow("digital", digital)
+        # for meter in meter_list:
+        #     cv2.imshow("meter", meter)
+        # cv2.waitKey(0)

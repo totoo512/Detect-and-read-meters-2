@@ -27,6 +27,8 @@ class Meter(TextDataset):
     def parse_txt(mask_path, mask_path1):
         """
             读取 json文件，解析出文字内容和标签，保存为 TextInstance 对象
+            mask_path中保存指针、刻度的位置信息
+            mask_path1中保存数字的位置信息
         """
 
         """
@@ -35,6 +37,7 @@ class Meter(TextDataset):
         :return: (list), TextInstance
         """
 
+        # mask_path中保存指针、刻度的位置信息
         with open(mask_path, 'r') as load_f:
             load_dict = json.load(load_f)
         info = load_dict['shapes']
@@ -45,6 +48,7 @@ class Meter(TextDataset):
             label = info[i]['label']
             polygons.append(TextInstance(points, 'c', label))
 
+        # mask_path1中保存数字的位置信息
         with open(mask_path1, 'r') as load_f:
             load_dict = json.load(load_f)
         info = load_dict['shapes']

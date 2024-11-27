@@ -10,6 +10,8 @@
 .settings
 .idea
 *.pth
+/demo
+/logs
  ##filter databfile、sln file##
 *.mdb
 *.ldb
@@ -48,3 +50,4 @@ Thumbs.db
 /.mvn/
 /mvnw.cmd
 /mvnw
+/demo/

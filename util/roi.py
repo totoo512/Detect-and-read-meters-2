@@ -29,9 +29,8 @@ def roi_transform(feature, box, size=(32, 180)):
     affine_matrix = torch.tensor(affine_matrix, device=feature.device, dtype=torch.float)
     affine_matrix /= 1e20
 
-
-    grid = torch.nn.functional.affine_grid(affine_matrix.unsqueeze(0), feature.unsqueeze(0).size())
-    feature_rotated = torch.nn.functional.grid_sample(feature.unsqueeze(0), grid)
+    grid = torch.nn.functional.affine_grid(affine_matrix.unsqueeze(0), feature.unsqueeze(0).size(), align_corners=False)
+    feature_rotated = torch.nn.functional.grid_sample(feature.unsqueeze(0), grid, align_corners=False)
     feature_rotated = feature_rotated[:, :, 0:resize_h, 0:resize_w]
 
     feature_rotated = feature_rotated.squeeze(0)

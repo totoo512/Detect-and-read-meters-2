@@ -97,7 +97,6 @@ def train(model, train_loader, criterion, scheduler, optimizer, epoch):
         # measure elapsed time
         batch_time.update(time.time() - end)
         end = time.time()
-        gc.collect()
 
         if i % cfg.display_freq == 0:
             print(
@@ -105,8 +104,8 @@ def train(model, train_loader, criterion, scheduler, optimizer, epoch):
                 .format(i, len(train_loader), loss.item(), loss_pointer.item(), loss_dail.item(), loss_text.item(),
                         loss_rec.item()))
 
-    if epoch % cfg.save_freq == 0:
-        save_model(model, epoch, scheduler.get_lr(), optimizer)
+    # if epoch % cfg.save_freq == 0:
+    #     save_model(model, epoch, scheduler.get_lr(), optimizer)
 
     print('Training Loss: {}'.format(losses.avg))
 
@@ -116,6 +115,7 @@ def main():
     means = (0.485, 0.456, 0.406)
     stds = (0.229, 0.224, 0.225)
 
+    # 大小为640*640
     transform = Augmentation(
         size=640, mean=means, std=stds
     )

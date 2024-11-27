@@ -12,6 +12,7 @@ import cv2
 from util.tool import order_points
 
 
+# 上采样模块
 class UpBlok(nn.Module):
 
     def __init__(self, in_channels, out_channels):
@@ -89,6 +90,7 @@ class FPN(nn.Module):
         return up1, up2, up3, up4, up5
 
 
+# 识别数字文本模块
 class TextNet(nn.Module):
     def __init__(self, backbone='vgg', is_training=True):
         super().__init__()
@@ -108,10 +110,11 @@ class TextNet(nn.Module):
 
     def load_model(self, model_path):
         print('Loading from {}'.format(model_path))
-        state_dict = torch.load(model_path)
+        state_dict = torch.load(model_path, weights_only=False)
         self.load_state_dict(state_dict['model'])
 
     def forward(self, x, boxes, mapping):
+        # todo：这里改识别刻度、指针、数字文本模型
         up1, up2, up3, up4, up5 = self.fpn(x)
         predict_out = self.predict(up1)
 

@@ -4,10 +4,15 @@ import os
 
 config = EasyDict()
 
-#config.gpu = "0,1"
+# config.gpu = "0,1"
 
 # dataloader jobs number
-#config.num_workers = 8
+# config.num_workers = 8
+
+# Use tensorboard to show data
+config.tensorboard = True
+
+config.log_dir = 'logs'
 
 # batch_size
 config.batch_size = 1
@@ -15,7 +20,9 @@ config.batch_size = 1
 # training epoch number
 config.max_epoch = 200
 
-config.start_epoch = 0
+config.start_epoch = 100
+
+config.resume = 'model/meter_data/textgraph_vgg_100.pth'
 
 # learning rate
 config.lr = 1e-4
@@ -43,14 +50,14 @@ config.max_points = 20
 config.use_hard = True
 
 # demo tr threshold
-config.tr_thresh = 0.9  #0.9
+config.tr_thresh = 0.9  # 0.9
 
 # demo tcl threshold
 config.tcl_thresh = 0.4
-#0.9 0.5 81.14
+# 0.9 0.5 81.14
 
 # expand ratio in post processing
-config.expend = -0.05 #0.15
+config.expend = -0.05  # 0.15
 
 # k-n graph
 config.k_at_hop = [8, 8]
@@ -59,7 +66,8 @@ config.k_at_hop = [8, 8]
 config.active_connection = 3
 
 config.graph_link = False  ### for Total-text icdar15 graph_link = False; forTD500 and CTW1500, graph_link = True
-config.link_thresh = 0.85 #0.9
+config.link_thresh = 0.85  # 0.9
+
 
 def update_config(config, extra_config):
     for k, v in vars(extra_config).items():

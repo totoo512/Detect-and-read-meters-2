@@ -26,15 +26,14 @@ class BaseOptions(object):
         self.parser = argparse.ArgumentParser()
 
         # basic opts
-        self.parser.add_argument('--exp_name', default="meter_data", type=str,help='Experiment name')
+        self.parser.add_argument('--exp_name', default="meter_data", type=str, help='Experiment name')
         self.parser.add_argument("--gpu", default="0", help="set gpu id", type=str)
         self.parser.add_argument('--resume', default='', type=str, help='Path to target resume checkpoint')
         self.parser.add_argument('--num_workers', default=4, type=int, help='Number of workers used in dataloading')
         self.parser.add_argument('--cuda', default=True, type=str2bool, help='Use cuda to train model')
-        self.parser.add_argument('--mgpu', action='store_true', help='Use multi-gpu to train model',default=True)
+        self.parser.add_argument('--mgpu', action='store_true', help='Use multi-gpu to train model', default=True)
         self.parser.add_argument('--save_dir', default='./model/', help='Path to save checkpoint models')
         self.parser.add_argument('--vis_dir', default='./vis/', help='Path to save visualization images')
-      
         self.parser.add_argument('--pretrain', default=True, type=str2bool, help='Pretrained AutoEncoder model')
         self.parser.add_argument('--viz', action='store_true', help='Whether to output debug info')
 
@@ -65,15 +64,14 @@ class BaseOptions(object):
         self.parser.add_argument('--means', type=int, default=(0.485, 0.456, 0.406), nargs='+', help='mean')
         self.parser.add_argument('--stds', type=int, default=(0.229, 0.224, 0.225), nargs='+', help='std')
         self.parser.add_argument('--input_size', default=640, type=int, help='model input size')
-        self.parser.add_argument('--test_size', default=(512, 1024 ), type=tuple, help='model input size')
+        self.parser.add_argument('--test_size', default=(512, 1024), type=tuple, help='model input size')
 
         # eval args
-        self.parser.add_argument('--checkepoch', default=100, type=int, help='Load checkpoint number')  #110, 220
+        self.parser.add_argument('--checkepoch', default=100, type=int, help='Load checkpoint number')  # 110, 220
         self.parser.add_argument('--start_epoch', default=0, type=int, help='start epoch number')
-        self.parser.add_argument('--pointer', default=0.6      , type=float, help='tr')
+        self.parser.add_argument('--pointer', default=0.6, type=float, help='tr')
         self.parser.add_argument('--dail', default=0.5, type=float, help='tcl')
         self.parser.add_argument('--text', default=0.6, type=float, help='kernel')
-
 
     def parse(self, fixed=None):
 

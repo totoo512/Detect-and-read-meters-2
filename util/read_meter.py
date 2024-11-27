@@ -16,7 +16,10 @@ class MeterReader(object):
 
         img_result = image.copy()
         value = self.find_lines(img_result, point_mask, dail_mask, number, std_point)
-        print("value", value)
+        if isinstance(value, str):
+            print("value", value)
+        else:
+            print("value", value[0])
 
         return value
 
@@ -36,6 +39,7 @@ class MeterReader(object):
         # cv2.imshow("dail_edges", dail_edges)
         # cv2.waitKey(0)
 
+        # pointer_lines：检测到的直线集合，每条直线由两个端点坐标表示
         pointer_lines = cv2.HoughLinesP(pointer_edges, 1, np.pi / 180, 10, np.array([]), minLineLength=10,
                                         maxLineGap=400)
         coin1, coin2 = None, None
@@ -49,9 +53,10 @@ class MeterReader(object):
             return "can not detect pointer"
 
         h, w, _ = ori_img.shape
-        center = (0.5 * w, 0.5 * h)
+        center = (0.5 * w, 0.5 * h)     # todo：中心点简单的设为原图像的中心，思考是否可以优化
         dis1 = (coin1[0] - center[0]) ** 2 + (coin1[1] - center[1]) ** 2
         dis2 = (coin2[0] - center[1]) ** 2 + (coin2[1] - center[1]) ** 2
+        # 确定直线的方向
         if dis1 <= dis2:
             pointer_line = (coin1, coin2)
         else:
@@ -67,8 +72,11 @@ class MeterReader(object):
         a2 = std_point[1]
         cv2.circle(ori_img, a1, 2, (255, 0, 0), 2)
         cv2.circle(ori_img, a2, 2, (255, 0, 0), 2)
+        # [指针的起始点，第一个刻度点]
         one = [[pointer_line[0][0], pointer_line[0][1]], [a1[0], a1[1]]]
+        # [指针的起始点，第二个刻度点]
         two = [[pointer_line[0][0], pointer_line[0][1]], [a2[0], a2[1]]]
+        # [指针的起始点，指针的终点]
         three = [[pointer_line[0][0], pointer_line[0][1]], [pointer_line[1][0], pointer_line[1][1]]]
         # print("one", one)
         # print("two", two)
@@ -78,8 +86,11 @@ class MeterReader(object):
         two = np.array(two)
         three = np.array(three)
 
+        # 指针起始点指向第一个刻度点的向量
         v1 = one[1] - one[0]
+        # 指针起始点指向第二个刻度点的向量
         v2 = two[1] - two[0]
+        # 指针起始点指向指针的终点的向量
         v3 = three[1] - three[0]
 
         distance = self.get_distance_point2line([a1[0], a1[1]],
@@ -116,10 +127,7 @@ class MeterReader(object):
         font = cv2.FONT_HERSHEY_SIMPLEX
         ori_img = cv2.putText(ori_img, str(value), (30, 30), font, 1.2, (255, 0, 255), 2)
 
-        cv2.imshow("result", ori_img)
-        cv2.waitKey(0)
-
-        return value
+        return value, ori_img
 
     def get_distance_point2line(self, point, line):
         """
@@ -143,6 +151,9 @@ class MeterReader(object):
         return value
 
     def angle(self, v1, v2):
+        """
+        计算两向量之间的夹角
+        """
         lx = np.sqrt(v1.dot(v1))
         ly = np.sqrt(v2.dot(v2))
         cos_angle = v1.dot(v2) / (lx * ly)

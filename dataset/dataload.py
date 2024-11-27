@@ -69,6 +69,7 @@ class TextDataset(object):
             polygons: TextInstance list
             transcripts: 标签 list
         """
+        # 原始图像高宽
         H, W, _ = image.shape
 
         if self.transform:
@@ -78,6 +79,10 @@ class TextDataset(object):
         dail_mask = np.zeros((image.shape[0], image.shape[1]), np.uint8)
         text_mask = np.zeros((image.shape[0], image.shape[1]), np.uint8)
 
+        # polygon.text对应json文件中的label
+        # label为1（text也为'1'）表示指针
+        # label为2（text也为'2'）表示刻度
+        # label为20（text为'number'）表示数字
         if polygons is not None:
             for i, polygon in enumerate(polygons):
                 if polygon.text == '1':

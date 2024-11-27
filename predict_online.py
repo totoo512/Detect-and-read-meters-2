@@ -1,13 +1,16 @@
-# 导入必要的库和模块
 import os
 import cv2
 import numpy as np
+import torchvision
+from torch.utils.tensorboard import SummaryWriter
+
 from util.augmentation import BaseTransform
 from util.config import config as cfg, update_config, print_config
 from util.option import BaseOptions
 from network.textnet import TextNet
 from util.detection_mask import TextDetector as TextDetector_mask
 import torch
+from torchvision.transforms import ToTensor
 from util.misc import to_device
 from util.read_meter import MeterReader
 from util.converter import keys, StringLabelConverter
@@ -20,6 +23,10 @@ args = option.initialize()
 # 更新配置并打印
 update_config(cfg, args)
 print_config(cfg)
+
+# 用tensorboard记录实验数据
+predict_logs_dir = os.path.join(cfg.log_dir, 'predict_logs')
+writer = SummaryWriter(predict_logs_dir)
 
 # 定义预测目录
 predict_dir = 'demo/'
@@ -36,23 +43,28 @@ converter = StringLabelConverter(keys)
 # 初始化检测器和表盘读数器
 det = Detector()
 detector = TextDetector_mask(model)
-meter = MeterReader()
+meter_reader = MeterReader()
 transform = BaseTransform(size=cfg.test_size, mean=cfg.means, std=cfg.stds)
 
 # 获取预测目录中的图像列表
 image_list = os.listdir(predict_dir)
 
 # 遍历图像列表进行处理
-for index in image_list:
-    print("**************", index)
-    image = cv2.imread(predict_dir + index)
+for image_name in image_list:
+    print("**************", image_name)
+    image = cv2.imread(predict_dir + image_name)
 
+    step = 0
     # 显示原始图像
-    cv2.imshow("det1", image)
-    cv2.waitKey(0)
+    if cfg.tensorboard:
+        writer.add_image(image_name, image, step, dataformats='HWC')
+        step += 1
+    else:
+        cv2.imshow("det1", image)
+        cv2.waitKey(0)
 
     # 检测表盘区域
-    image, image_info, digital_list, meter_list = det.detect(image, index)
+    image, image_info, digital_list, meter_list = det.detect(image)
 
     # 如果没有检测到表盘则跳过
     if len(meter_list) == 0:
@@ -60,12 +72,16 @@ for index in image_list:
         continue
     else:
         # 对每个检测到的表盘进行处理
-        for i in meter_list:
-            cv2.imshow("det", i)
-            cv2.waitKey(0)
+        for meter in meter_list:
+            if cfg.tensorboard:
+                writer.add_image(image_name, meter, step, dataformats='HWC')
+                step += 1
+            else:
+                cv2.imshow("det", meter)
+                cv2.waitKey(0)
 
             # 对表盘图像进行预处理
-            image, _ = transform(i)
+            image, _ = transform(meter)
             # HWC -> CHW
             image = image.transpose(2, 0, 1)
             image = torch.from_numpy(image).unsqueeze(0)
@@ -93,4 +109,20 @@ for index in image_list:
             img_show = ((img_show * cfg.stds + cfg.means) * 255).astype(np.uint8)
 
             # 使用表盘读数器获取最终结果
-            result = meter(img_show, pointer_pred, dail_pred, text_pred, pred_transcripts, std_points)
+            value = meter_reader(img_show, pointer_pred, dail_pred, text_pred, pred_transcripts, std_points)
+            if isinstance(value, str):
+                continue
+            else:
+                result, result_img = value
+
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            result_img = cv2.putText(result_img, str(result), (30, 30), font, 1.2, (255, 0, 255), 2)
+
+            if cfg.tensorboard:
+                writer.add_image(image_name, result_img, step, dataformats='HWC')
+                step += 1
+            else:
+                cv2.imshow("result", result_img)
+                cv2.waitKey(0)
+
+writer.close()

@@ -17,9 +17,7 @@ from util import canvas as cav
 import time
 from dataset.meter_data import Meter
 
-
 if __name__ == '__main__':
-
 
     means = (0.485, 0.456, 0.406)
     stds = (0.229, 0.224, 0.225)
@@ -30,18 +28,16 @@ if __name__ == '__main__':
 
     trainset = Meter(transform=transform)
 
-
     for idx in range(0, len(trainset)):
         t0 = time.time()
-        print("idx",idx)
+        print("idx", idx)
 
-
-        img,  pointer_mask, dail_mask, text_mask, train_mask,bboxs,transcripts =trainset[idx]
+        img, pointer_mask, dail_mask, text_mask, train_mask, bboxs, transcripts = trainset[idx]
 
         img = img.transpose(1, 2, 0)
         img = ((img * stds + means) * 255).astype(np.uint8)
 
-        print("trans",transcripts)
+        print("trans", transcripts)
         cv2.imshow('imgs', img)
         cv2.imshow("pointer_mask", cav.heatmap(np.array(pointer_mask * 255 / np.max(pointer_mask), dtype=np.uint8)))
         cv2.imshow("dail_mask", cav.heatmap(np.array(dail_mask * 255 / np.max(dail_mask), dtype=np.uint8)))

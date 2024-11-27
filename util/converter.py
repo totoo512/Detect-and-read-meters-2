@@ -2,7 +2,8 @@ import torch
 import unicodedata as ud
 
 # keys = ' 0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ@!"#$%&\'[]()+,-./:;=?´ÉÈ'
-with open('util/codec.txt', 'r') as f:
+# keys = '0123456789.'
+with open('./util/codec.txt', 'r') as f:
     keys = f.readlines()[0]
 
 
@@ -27,30 +28,55 @@ class StringLabelConverter(object):
             self.dict[char] = i + 1
 
     def encode(self, text):
+        """
+        将给定的文本列表转换为它们在字典中的索引，并对它们进行适当的填充以使它们具有相同的长度。
+
+        参数:
+        text (list of str): 待编码的文本列表，每个元素代表一个文本项。
+
+        返回:
+        torch.LongTensor: 编码后的文本张量。
+        torch.LongTensor: 每个文本项原始长度的张量。
+        """
+        # 初始化长度列表和结果列表
         length = []
         result = []
+
+        # 遍历每个文本项
         for item in text:
+            # 检查文本项是否以阿拉伯字符开头，如果是，则将其反转
             if len(item) > 0 and 'ARABIC' in ud.name(item[0]):
                 item = item[::-1]
+
+            # 记录每个文本项的长度
             length.append(len(item))
+
+            # 初始化字符索引列表
             r = []
             for char in item:
+                # 获取字符在字典中的索引，并添加到列表中
                 index = self.dict[char]
                 r.append(index)
             result.append(r)
 
+        # 初始化最大长度为0
         max_len = 0
+        # 遍历结果列表，找到最大的文本项长度
         for r in result:
             if len(r) > max_len:
                 max_len = len(r)
 
+        # 初始化临时结果列表
         result_temp = []
+        # 对每个文本项进行填充，使其长度与最大长度相同
         for r in result:
             for i in range(max_len - len(r)):
                 r.append(0)
             result_temp.append(r)
 
+        # 将临时结果赋值给text变量
         text = result_temp
+        # 返回编码后的文本张量和长度张量
         return torch.LongTensor(text), torch.LongTensor(length)
 
     def decode(self, t, length, raw=False):
